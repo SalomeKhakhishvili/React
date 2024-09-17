@@ -1,74 +1,75 @@
 import React, { useState } from 'react';
-import './App.css';
+import TaskInput from './TaskInput';
+import TaskList from './TaskList';
+import './App.css'; 
 
-function App() {
-  const [tasks, setTasks] = useState([]);
-  const [completedTasks, setCompletedTasks] = useState([]);
-  const [newTask, setNewTask] = useState('');
+function ToDoApp() {
+  const [todoList, setTodoList] = useState([]);
+  const [inProgressList, setInProgressList] = useState([]);
+  const [completedList, setCompletedList] = useState([]);
 
-  const addTask = () => {
-    if (newTask.trim()) {
-      setTasks([...tasks, newTask]);
-      setNewTask('');
-    }
+  const addTask = (task) => {
+    setTodoList([...todoList, task]);
   };
 
-  const completeTask = (index) => {
-    const taskToComplete = tasks[index];
-    setTasks(tasks.filter((_, i) => i !== index));
-    setCompletedTasks([...completedTasks, taskToComplete]);
+  const moveToInProgress = (taskIndex) => {
+    const task = todoList[taskIndex];
+    setTodoList(todoList.filter((_, index) => index !== taskIndex));
+    setInProgressList([...inProgressList, task]);
   };
 
-  const undoTask = (index) => {
-    const taskToUndo = completedTasks[index];
-    setCompletedTasks(completedTasks.filter((_, i) => i !== index));
-    setTasks([...tasks, taskToUndo]);
+  const moveToCompleted = (taskIndex) => {
+    const task = inProgressList[taskIndex];
+    setInProgressList(inProgressList.filter((_, index) => index !== taskIndex));
+    setCompletedList([...completedList, task]);
   };
 
-  const deleteTask = (index) => {
-    setCompletedTasks(completedTasks.filter((_, i) => i !== index));
+  const deleteTask = (taskIndex) => {
+    setCompletedList(completedList.filter((_, index) => index !== taskIndex));
+  };
+
+  const undoToTodo = (taskIndex) => {
+    const task = inProgressList[taskIndex];
+    setInProgressList(inProgressList.filter((_, index) => index !== taskIndex));
+    setTodoList([...todoList, task]);
+  };
+
+  const undoToInProgress = (taskIndex) => {
+    const task = completedList[taskIndex];
+    setCompletedList(completedList.filter((_, index) => index !== taskIndex));
+    setInProgressList([...inProgressList, task]);
   };
 
   return (
-    <div className="container">
-      <h1>To-Do List</h1>
-      <div className="input-group">
-        <input
-          type="text"
-          value={newTask}
-          onChange={(e) => setNewTask(e.target.value)}
-          placeholder="შეიყვანე ახალი დავალება"
+    <div className="app-container">
+      <h1 className="title">To Do List</h1>
+      <TaskInput addTask={addTask} />
+      <div className="columns-container">
+        <TaskList
+          title="To Do"
+          tasks={todoList}
+          moveTask={moveToInProgress}
+          buttonLabel="დაიწყე"
         />
-        <button onClick={addTask}>დამატება</button>
-      </div>
-      <div className="columns">
-        <div className="column">
-          <h2>შესასრულებელი დავალებები</h2>
-          <ul>
-            {tasks.map((task, index) => (
-              <li key={index}>
-                {task} 
-                <button onClick={() => completeTask(index)}>დასრულება</button>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="column">
-          <h2>შესრულებული დავალებები</h2>
-          <ul>
-            {completedTasks.map((task, index) => (
-              <li key={index}>
-                {task} 
-                <button onClick={() => undoTask(index)}>გადატანა</button>
-                <button onClick={() => deleteTask(index)}>წაშლა</button>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <TaskList
+          title="In Progress"
+          tasks={inProgressList}
+          moveTask={moveToCompleted}
+          undoTask={undoToTodo}
+          buttonLabel="დასრულება"
+          undoLabel="უკან დაბრუნება"
+        />
+        <TaskList
+          title="Completed"
+          tasks={completedList}
+          moveTask={undoToInProgress}
+          deleteTask={deleteTask}
+          buttonLabel="დაბრუნება"
+          deleteLabel="წაშლა"
+        />
       </div>
     </div>
   );
 }
 
-export default App;
-
+export default ToDoApp;
