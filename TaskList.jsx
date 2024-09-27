@@ -1,27 +1,35 @@
+// src/components/Task.js
 import React from 'react';
-import TaskItem from './TaskItem';
 
-function TaskList({ title, tasks, moveTask, undoTask, deleteTask, buttonLabel, undoLabel, deleteLabel }) {
-  return (
-    <div className="column">
-      <h2>{title}</h2>
-      <ul>
-        {tasks.map((task, index) => (
-          <TaskItem
-            key={index}
-            task={task}
-            index={index}
-            moveTask={moveTask}
-            undoTask={undoTask}
-            deleteTask={deleteTask}
-            buttonLabel={buttonLabel}
-            undoLabel={undoLabel}
-            deleteLabel={deleteLabel}
-          />
-        ))}
-      </ul>
-    </div>
-  );
-}
+const Task = ({ task, toggleComplete, editTask }) => {
+    const handleToggle = async () => {
+        const updatedTask = { ...task, isCompleted: !task.isCompleted };
+        
+        const response = await fetch(`https://crudapi.co.uk/api/v1/tasks/${task.id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.REACT_APP_CRUD_API_KEY}`,
+            },
+            body: JSON.stringify(updatedTask),
+        });
 
-export default TaskList;
+        if (response.ok) {
+            toggleComplete(task.id);
+        }
+    };
+
+    return (
+        <div>
+            <span style={{ textDecoration: task.isCompleted ? 'line-through' : 'none' }}>
+                {task.name}
+            </span>
+            <button onClick={handleToggle}>
+                {task.isCompleted ? 'Undo' : 'Complete'}
+            </button>
+            <button onClick={() => editTask(task)}>Edit</button>
+        </div>
+    );
+};
+
+export default Task;
